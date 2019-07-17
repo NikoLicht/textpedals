@@ -1,30 +1,26 @@
 <template>
     <div id="app" v-on:click="newWord" >
         <reversePedal :inputs="otherString"  title="Reverser Pedal" ></reversePedal>
-        <wordmixPedal :inputs="otherString"  title="Word Mixer Pedal" ></wordmixPedal>
     </div>
 </template>
 
 <script>
 import reversePedal from './components/reversePedal.vue'
-import wordmixPedal from './components/wordmixPedal.vue'
 
 export default {
     name: 'app',
     components: {
-        reversePedal,
-        wordmixPedal
+        reversePedal
     },
     data () {
         return {
-            otherString: ['testin a string', 'javacript code run']
+            otherString: ['butter']
         }
     },
     methods: {
         newWord () {
             console.log('now')
             this.otherString.push('naka')
-            //<wordmixPedal :inputs="otherString"  title="Word Mixer Pedal" ></wordmixPedal>
         }
     }
 }

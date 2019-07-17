@@ -32,7 +32,10 @@
       "plugin:vue/essential",
       "@vue/standard"
     ],
-    "rules": {},
+    "rules": {
+        "vue/script-indent": "off",
+        "indent": "off"
+    },
     "parserOptions": {
       "parser": "babel-eslint"
     }
