@@ -1,23 +1,29 @@
 <template>
-    <div id="pedal-base">
+    <vue-draggable-resizable 
+        class="pedal-base" 
+        @dragging="onDrag" 
+        :parent="true" 
+        :drag-handle="'.handle'"
+    >
+        <div class="handle">handle</div>
         <h1> {{ title }} </h1>
-        <div class="input-box" v-on:mouseup="isChild">
+        <div class="input-box cancel-drag" v-on:mouseup="isChild">
             <h1 class="input-label">INPUT</h1>
             <div id="inputTexts" v-for="input in inputs" v-bind:key="input">
                 <h2 class="input"> {{ input }} </h2>
             </div>
         </div>
 
-        <div class="output-box" v-on:mousedown="isParent">
+        <div class="output-box cancel-drag" v-on:mousedown="isParent">
             <h1 class="output-label">OUTPUT</h1>
             <h2 id="output"> {{ output }} </h2>
         </div>
-    </div>
-
+    </vue-draggable-resizable>
 </template>
 
 <script>
 import { bus } from '../main.js'
+import VueDraggableResizable from 'vue-draggable-resizable'
 
 export default {
     name: 'PedalBase',
@@ -31,13 +37,22 @@ export default {
     data: function () {
         return {
             output: '',
-            id: ''
+            id: '',
+            width: 0,
+            x: 0,
+            y: 0
         }
+    },
+    components: {
+        VueDraggableResizable
     },
     watch: {
         inputs: function (val) {
             this.output = this.changeText(this.inputs)
-            this.$emit('new-text', this.output)
+            let finalOutput = {}
+            finalOutput.id = this.id
+            finalOutput.text = this.output
+            this.sendOutput(finalOutput)
             return this.output
         }
     },
@@ -46,7 +61,7 @@ export default {
             return inputText
         },
         sendOutPut: function (newOutput) {
-            bus.$emit('calculated-new-output', newOutput)
+            bus.$emit('new-output', newOutput)
         },
         isParent: function () {
             bus.$emit('is-parent', this.id)
@@ -63,6 +78,10 @@ export default {
             }
             newId = s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4()
             this.id = newId
+        },
+        onDrag: function (x, y) {
+            this.x = x
+            this.y = y
         }
     },
     mounted () {
@@ -75,15 +94,16 @@ export default {
 </script>
 
 <style scoped lang="scss">
-#pedal-base {
+.pedal-base {
     min-height: 335px;
     width: 250px;
     padding-bottom: 1em;
     background-color: firebrick;
     border-radius: 25px;
-    position: absolute;
+        user-select: none;
 
     .input-box, .output-box{
+        user-select: none;
         border-radius: 25px;
         background-color: lightPink;
         width: 80%;
@@ -95,6 +115,16 @@ export default {
         padding-top: 1em;
         font-size: 1em;
         color: white;
+    }
+    .handle{
+        background-color: orange;
+        width: 80%;
+        height: 25px;
+        border-radius: 25px;
+        margin-top: 1em;
+        color: white;
+        margin-left: auto;
+        margin-right: auto;
     }
 }
 

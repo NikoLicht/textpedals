@@ -1,5 +1,5 @@
 <template>
-    <div id="app" v-on:click="newWord" >
+    <div id="app">
         <reversePedal :inputs="inputStrings"  title="Reverser Pedal" ></reversePedal>
         <wordmixPedal :inputs="inputStrings"  title="Word Mixer Pedal" ></wordmixPedal>
     </div>
@@ -20,12 +20,13 @@ export default {
         return {
             inputStrings: ['testin a string', 'javacript code run'],
             pedals: {},
-            currentParent: null
+            currentParent: null,
+            latestOutput: null
         }
     },
     methods: {
         newWord () {
-            this.inputStrings.push(this.inputStrings[this.inputStrings.lenght - 1] + this.inputStrings[0][1])
+           console.log(`dont just click on things`)
         },
 
         setChild (childId) {
@@ -43,17 +44,24 @@ export default {
         setParent (parentId) {
             console.log('setting parent id: ' + parentId)
             this.currentParent = parentId
+        },
+        passOutput (output) {
+            // find a way to give all child elements that data
+            // this could be done by sending an event to all pedals, but only the one that has that id should act
         }
 
     },
 
     created () {
-        // bus.$on('calculated-new-output',
         bus.$on('is-child', (childId) => {
             this.setChild(childId)
         })
         bus.$on('is-parent', (parentId) => {
             this.setParent(parentId)
+        })
+        bus.$on('new-output', (output) => {
+            this.latestOutput = output.text
+            this.passOutput(output)
         })
     }
 }
@@ -76,5 +84,6 @@ body{
     -webkit-font-smoothing: antialiased;
     text-align: center;
     color: #2c3e50;
+    position: relative
 }
 </style>
