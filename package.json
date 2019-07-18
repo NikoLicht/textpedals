@@ -34,7 +34,8 @@
     ],
     "rules": {
         "vue/script-indent": "off",
-        "indent": "off"
+        "indent": "off",
+        "fix": true
     },
     "parserOptions": {
       "parser": "babel-eslint"

@@ -1,14 +1,14 @@
 <template>
     <div id="pedal-base">
         <h1> {{ title }} </h1>
-        <div class="input-box">
+        <div class="input-box" v-on:mouseup="isChild">
             <h1 class="input-label">INPUT</h1>
             <div id="inputTexts" v-for="input in inputs" v-bind:key="input">
                 <h2 class="input"> {{ input }} </h2>
             </div>
         </div>
 
-        <div class="output-box">
+        <div class="output-box" v-on:mousedown="isParent">
             <h1 class="output-label">OUTPUT</h1>
             <h2 id="output"> {{ output }} </h2>
         </div>
@@ -17,7 +17,7 @@
 </template>
 
 <script>
-import { EventBus } from './event-bus.js'
+import { bus } from '../main.js'
 
 export default {
     name: 'PedalBase',
@@ -30,7 +30,8 @@ export default {
     },
     data: function () {
         return {
-            output: ''
+            output: '',
+            id: ''
         }
     },
     watch: {
@@ -43,19 +44,34 @@ export default {
     methods: {
         changeText: function (inputText) {
             return inputText
+        },
+        sendOutPut: function (newOutput) {
+            bus.$emit('calculated-new-output', newOutput)
+        },
+        isParent: function () {
+            bus.$emit('is-parent', this.id)
+        },
+        isChild: function () {
+            bus.$emit('is-child', this.id)
+        },
+        calculateId: function () {
+            let newId = ''
+            function s4 () {
+                return Math.floor((1 + Math.random()) * 0x10000)
+                    .toString(16)
+                    .substring(1)
+            }
+            newId = s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4()
+            this.id = newId
         }
     },
-    mounted: function () {
+    mounted () {
         this.output = this.changeText(this.inputs)
-        this.$emit('new-text', this.output)
+        this.calculateId()
         return this.output
-    },
-    methods: {
-        sendOutPut: function (newOutput){
-            EventBus.$emit('calculated-new-output', newOutput)
-        }
     }
 }
+
 </script>
 
 <style scoped lang="scss">

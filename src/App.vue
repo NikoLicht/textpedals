@@ -1,13 +1,14 @@
 <template>
     <div id="app" v-on:click="newWord" >
-        <reversePedal :inputs="otherString"  title="Reverser Pedal" ></reversePedal>
-        <wordmixPedal :inputs="otherString"  title="Word Mixer Pedal" ></wordmixPedal>
+        <reversePedal :inputs="inputStrings"  title="Reverser Pedal" ></reversePedal>
+        <wordmixPedal :inputs="inputStrings"  title="Word Mixer Pedal" ></wordmixPedal>
     </div>
 </template>
 
 <script>
 import reversePedal from './components/reversePedal.vue'
 import wordmixPedal from './components/wordmixPedal.vue'
+import { bus } from './main.js'
 
 export default {
     name: 'app',
@@ -17,15 +18,43 @@ export default {
     },
     data () {
         return {
-            otherString: ['testin a string', 'javacript code run']
+            inputStrings: ['testin a string', 'javacript code run'],
+            pedals: {},
+            currentParent: null
         }
     },
     methods: {
         newWord () {
-            console.log('now')
-            this.otherString.push('naka')
-            //<wordmixPedal :inputs="otherString"  title="Word Mixer Pedal" ></wordmixPedal>
+            this.inputStrings.push(this.inputStrings[this.inputStrings.lenght - 1] + this.inputStrings[0][1])
+        },
+
+        setChild (childId) {
+            console.log('setting child id: ' + childId)
+            if (this.currentParent != null) {
+                // TODO: check if the parent already has the child
+
+                if (!(this.currentParent in this.pedals)) {
+                    this.pedals[this.currentParent] = {}
+                }
+                this.pedals[this.currentParent][childId] = childId
+                this.currentParent = null
+            }
+        },
+        setParent (parentId) {
+            console.log('setting parent id: ' + parentId)
+            this.currentParent = parentId
         }
+
+    },
+
+    created () {
+        // bus.$on('calculated-new-output',
+        bus.$on('is-child', (childId) => {
+            this.setChild(childId)
+        })
+        bus.$on('is-parent', (parentId) => {
+            this.setParent(parentId)
+        })
     }
 }
 
@@ -33,8 +62,8 @@ export default {
 
 <style lang="scss">
 body{
-padding:0;
-margin: 0;
+    padding:0;
+    margin: 0;
 }
 #app {
     margin: 0;
