@@ -17,6 +17,8 @@
 </template>
 
 <script>
+import { EventBus } from './event-bus.js'
+
 export default {
     name: 'PedalBase',
     props: {
@@ -47,6 +49,11 @@ export default {
         this.output = this.changeText(this.inputs)
         this.$emit('new-text', this.output)
         return this.output
+    },
+    methods: {
+        sendOutPut: function (newOutput){
+            EventBus.$emit('calculated-new-output', newOutput)
+        }
     }
 }
 </script>
