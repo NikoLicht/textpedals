@@ -1,24 +1,27 @@
 <template>
     <div id="app">
-        <reversePedal :inputs="inputStrings"  title="Reverser Pedal" ></reversePedal>
-        <wordmixPedal :inputs="inputStrings"  title="Word Mixer Pedal" ></wordmixPedal>
+        <testPedal :inputs="inputStrings" :maxInputs="1" title="test pedal" ></testPedal>
     </div>
 </template>
 
 <script>
 import reversePedal from './components/reversePedal.vue'
 import wordmixPedal from './components/wordmixPedal.vue'
+import wahPedal from './components/wahPedal.vue'
+import testPedal from './components/testPedal.vue'
 import { bus } from './main.js'
 
 export default {
     name: 'app',
     components: {
-        reversePedal,
-        wordmixPedal
+        testPedal
     },
     data () {
         return {
-            inputStrings: ['testin a string', 'javacript code run'],
+            inputStrings: {
+                'master': 'dog',
+                'maestro': 'cat'
+            },
             pedals: {},
             currentParent: null,
             latestOutput: null
@@ -26,7 +29,7 @@ export default {
     },
     methods: {
         newWord () {
-           console.log(`dont just click on things`)
+            console.log(`dont just click on things`)
         },
 
         setChild (childId) {
@@ -37,7 +40,10 @@ export default {
                 if (!(this.currentParent in this.pedals)) {
                     this.pedals[this.currentParent] = {}
                 }
-                this.pedals[this.currentParent][childId] = childId
+                this.pedals[this.currentParent][childId] = {}
+                this.pedals[this.currentParent][childId].id = childId
+
+                console.log(pedals)
                 this.currentParent = null
             }
         },
@@ -46,8 +52,15 @@ export default {
             this.currentParent = parentId
         },
         passOutput (output) {
-            // find a way to give all child elements that data
-            // this could be done by sending an event to all pedals, but only the one that has that id should act
+            let chainOutput = {}
+            chainOutput.text = output.text
+            chainOutput.id = output.id
+            chainOutput.recievers = this.pedals[output.id]
+            if (chainOutput.recievers != undefined) {
+                bus.$emit('chain-output', chainOutput)
+            } else {
+                console.warn("tried to send event to all recievers, but there were not any")
+            }
         }
 
     },

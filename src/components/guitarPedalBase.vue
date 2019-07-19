@@ -1,10 +1,10 @@
 <template>
-    <vue-draggable-resizable 
-        class="pedal-base" 
-        @dragging="onDrag" 
-        :parent="true" 
+    <vue-draggable-resizable
+        class="pedal-base"
+        @dragging="onDrag"
+        :parent="true"
         :drag-handle="'.handle'"
-    >
+        >
         <div class="handle">handle</div>
         <h1> {{ title }} </h1>
         <div class="input-box cancel-drag" v-on:mouseup="isChild">
@@ -30,15 +30,17 @@ export default {
     props: {
         title: String,
         color: String,
-        inputs: Array,
+        inputs: Object,
         chainParent: Object,
-        chainChild: Array
+        chainChild: Array,
+        maxInputs: Number
     },
     data: function () {
         return {
             output: '',
             id: '',
             width: 0,
+            height: 0,
             x: 0,
             y: 0
         }
@@ -57,10 +59,10 @@ export default {
         }
     },
     methods: {
-        changeText: function (inputText) {
-            return inputText
+        changeText: function (inputArray) {
+            return this.saveOutput("a string") 
         },
-        sendOutPut: function (newOutput) {
+        sendOutput: function (newOutput) {
             bus.$emit('new-output', newOutput)
         },
         isParent: function () {
@@ -78,6 +80,24 @@ export default {
             }
             newId = s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4()
             this.id = newId
+            console.log("setting output")
+        },
+        saveOutput (result) {
+            this.output = result
+            this.sendOutput(result)
+            return result
+        },
+        isEmptyOrNullOrUndefined: function(text) {
+            let testResult = true
+
+            if ( text == null ){
+                return testResult
+            } else if (text == undefined) {
+                return testResult
+            } else if (text == '') {
+                return testResult
+            }
+            return false
         },
         onDrag: function (x, y) {
             this.x = x
@@ -85,9 +105,17 @@ export default {
         }
     },
     mounted () {
-        this.output = this.changeText(this.inputs)
         this.calculateId()
+        this.output = this.changeText(this.inputs)
         return this.output
+    },
+    created () {
+        bus.$on('chain-output', (chainOutput) => {
+            if (this.id in chainOutput.recievers) {
+                this.inputs[chainOutput.id] = chainOutput.text
+                console.log(this.inputs)
+            }
+        })
     }
 }
 
@@ -100,10 +128,8 @@ export default {
     padding-bottom: 1em;
     background-color: firebrick;
     border-radius: 25px;
-        user-select: none;
 
     .input-box, .output-box{
-        user-select: none;
         border-radius: 25px;
         background-color: lightPink;
         width: 80%;

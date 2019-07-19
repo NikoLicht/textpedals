@@ -1,37 +1,42 @@
-
+<template>
+</template>
 
 <script>
 import PedalBase from './guitarPedalBase.vue'
 export default {
     extends: PedalBase,
-   name: 'wordmix-pedal',
-   methods: {
-        changeText(inputText) {
+    name: 'wordmix-pedal',
+    methods: {
+        changeText (inputs) {
+            let progression = 0
             let result = ''
-            if (true) {
-                let primaryString = ''
-                let secondaryString = ''
-                if (inputText[0].length >= inputText[1].length) {
-                    primaryString = inputText[0]
-                    secondaryString = inputText[1]
-}
-                else {
-                    primaryString = inputText[1]
-                    secondaryString = inputText[0]
-}
+            let listOfStrings = [] 
+            let numberOfInputs = Object.keys(inputs).length
 
-                for( var i = 0; i <= (primaryString.length - 1); i++) {
-                    result += primaryString[i]
-                    if (secondaryString[i] != undefined){
-                        result += secondaryString[i]
-}
-}
-}
+            Object.keys(inputs).forEach((input) => {
+                listOfStrings.push(input)
+            })
 
-            this.output = result
-            return this.output
-}
-}
+            console.log(listOfStrings)
+
+            listOfStrings.sort((a, b) => {
+                return b.length - a.length
+            })
+
+            for (let i = 0; i < (listOfStrings[0].length - 1); i ++) {
+                for (let j = 0; j < (listOfStrings.length - 1); j++) {
+                    if (!this.isEmptyOrNullOrUndefined(listOfStrings[i])) {
+                        if (!this.isEmptyOrNullOrUndefined(listOfStrings[i][j])) {
+                            result += listOfStrings[i][j]
+                        }
+                    }
+                }
+            }
+
+
+            return this.saveOutput(result)
+        }
+    }
 }
 </script>
 

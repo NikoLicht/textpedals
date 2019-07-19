@@ -4,12 +4,16 @@ export default {
     extends: PedalBase,
     name: 'reverse-pedal',
     methods: {
-        changeText (inputText) {
+        changeText (inputs) {
             let result = ''
-            console.log(inputText[0])
-            result = inputText[0].split('').reverse().join('')
-            this.output = result
-            return this.output
+            Object.keys(inputs).forEach((input) => {
+                if (this.inputsWentThrough < this.maxInputs) {
+                console.log('running')
+                    result = input.split('').reverse().join('')
+                    this.inputsWentThrough++
+                    return this.saveOutput(result)
+                }
+            })
         }
     }
 }
