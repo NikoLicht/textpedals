@@ -1,8 +1,9 @@
 <template>
     <div id="app">
         <testPedal :inputs="inputStrings" :maxInputs="1" title="test pedal" ></testPedal>
+        <testPedal :inputs="inputStrings" :maxInputs="1" title="test pedal" ></testPedal>
     </div>
-</template>
+    </template>
 
 <script>
 import reversePedal from './components/reversePedal.vue'
@@ -43,7 +44,9 @@ export default {
                 this.pedals[this.currentParent][childId] = {}
                 this.pedals[this.currentParent][childId].id = childId
 
-                console.log(pedals)
+                console.log('this is the structure')
+                console.log(this.pedals)
+                console.log('this was the structure')
                 this.currentParent = null
             }
         },

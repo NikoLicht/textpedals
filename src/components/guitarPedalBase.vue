@@ -7,7 +7,7 @@
         >
         <div class="handle">handle</div>
         <h1> {{ title }} </h1>
-        <div class="input-box cancel-drag" v-on:mouseup="isChild">
+            <div class="input-box cancel-drag" v-on:mouseup="isChild">
             <h1 class="input-label">INPUT</h1>
             <div id="inputTexts" v-for="input in inputs" v-bind:key="input">
                 <h2 class="input"> {{ input }} </h2>
@@ -50,6 +50,7 @@ export default {
     },
     watch: {
         inputs: function (val) {
+            console.log('i updated my inputs')
             this.output = this.changeText(this.inputs)
             let finalOutput = {}
             finalOutput.id = this.id
@@ -111,6 +112,7 @@ export default {
     },
     created () {
         bus.$on('chain-output', (chainOutput) => {
+            inputs()
             if (this.id in chainOutput.recievers) {
                 this.inputs[chainOutput.id] = chainOutput.text
                 console.log(this.inputs)

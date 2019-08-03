@@ -1,6 +1,3 @@
-<template>
-</template>
-
 <script>
 import PedalBase from './guitarPedalBase.vue'
 export default {
