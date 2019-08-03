@@ -20,8 +20,8 @@ export default {
     data () {
         return {
             inputStrings: {
-                'master': 'dog',
-                'maestro': 'cat'
+                'master': 'test',
+                'maestro': 'strings'
             },
             pedals: {},
             currentParent: null,
@@ -46,7 +46,6 @@ export default {
 
                 console.log('this is the structure')
                 console.log(this.pedals)
-                console.log('this was the structure')
                 this.currentParent = null
             }
         },
@@ -56,6 +55,7 @@ export default {
         },
         passOutput (output) {
             let chainOutput = {}
+            console.log('this is the output')
             chainOutput.text = output.text
             chainOutput.id = output.id
             chainOutput.recievers = this.pedals[output.id]
@@ -76,6 +76,9 @@ export default {
             this.setParent(parentId)
         })
         bus.$on('new-output', (output) => {
+            // The problem is that the output is not passed in the format that
+            // PassOutput expects. THis should be fixed by following the trail
+            // of the new-output event
             this.latestOutput = output.text
             this.passOutput(output)
         })

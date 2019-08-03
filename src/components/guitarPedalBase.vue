@@ -50,6 +50,7 @@ export default {
     },
     watch: {
         inputs: function (val) {
+            console.log(val)
             console.log('i updated my inputs')
             this.output = this.changeText(this.inputs)
             let finalOutput = {}
@@ -69,7 +70,7 @@ export default {
         isParent: function () {
             bus.$emit('is-parent', this.id)
         },
-        isChild: function () {
+        isoutput
             bus.$emit('is-child', this.id)
         },
         calculateId: function () {
@@ -112,8 +113,8 @@ export default {
     },
     created () {
         bus.$on('chain-output', (chainOutput) => {
-            inputs()
             if (this.id in chainOutput.recievers) {
+                console.log('the pedal is me')
                 this.inputs[chainOutput.id] = chainOutput.text
                 console.log(this.inputs)
             }
