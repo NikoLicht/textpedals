@@ -54,6 +54,7 @@ export default {
             let finalOutput = {}
             finalOutput.id = this.id
             finalOutput.text = this.output
+            console.log('this is the output that is being send' + this.output)
             this.sendOutput(finalOutput)
             return this.output
         }
@@ -111,8 +112,10 @@ export default {
     },
     created () {
         bus.$on('chain-output', (chainOutput) => {
+            //This is probably where the pedals input field should be updated
             if (this.id in chainOutput.recievers) {
                 this.inputs[chainOutput.id] = chainOutput.text
+                console.log(chainOutput.text)
                 console.log(this.inputs)
             }
         })
@@ -126,15 +129,22 @@ export default {
     min-height: 335px;
     width: 250px;
     padding-bottom: 1em;
-    background-color: firebrick;
-    border-radius: 25px;
+    background-color: #fc8403;
+    -webkit-user-select: none;  /* Chrome all / Safari all */
+    -moz-user-select: none;     /* Firefox all */
+    -ms-user-select: none;      /* IE 10+ */
+    user-select: none;          /* Likely future */      border-radius: 25px;
 
     .input-box, .output-box{
         border-radius: 25px;
-        background-color: lightPink;
+        background-color: #f5b46e;
         width: 80%;
         margin-left: auto;
         margin-right: auto;
+        -webkit-user-select: none;  /* Chrome all / Safari all */
+        -moz-user-select: none;     /* Firefox all */
+        -ms-user-select: none;      /* IE 10+ */
+        user-select: none;          /* Likely future */      border-radius: 25px;
     }
 
     h1{
@@ -143,7 +153,7 @@ export default {
         color: white;
     }
     .handle{
-        background-color: orange;
+        background-color: #a89371;
         width: 80%;
         height: 25px;
         border-radius: 25px;

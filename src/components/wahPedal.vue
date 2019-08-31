@@ -31,8 +31,8 @@ export default {
 
                         }
                     }
-                    return this.saveOutput(result)
                     count ++
+                    return this.saveOutput(result)
                 }
             }
         }

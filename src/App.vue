@@ -1,6 +1,7 @@
 <template>
     <div id="app">
-        <testPedal :inputs="inputStrings" :maxInputs="1" title="test pedal" ></testPedal>
+        <testPedal :inputs="inputStrings" :maxInputs="4" title="test pedal" ></testPedal>
+        <reversePedal :inputs="inputStrings" :maxInputs="4" title="reverse Pedal" ></reversePedal>
     </div>
 </template>
 
@@ -14,13 +15,15 @@ import { bus } from './main.js'
 export default {
     name: 'app',
     components: {
-        testPedal
+        testPedal,
+        reversePedal
     },
     data () {
         return {
             inputStrings: {
                 'master': 'dog',
-                'maestro': 'cat'
+                'mister': 'cat',
+                'maestro': 'butter'
             },
             pedals: {},
             currentParent: null,
@@ -43,7 +46,8 @@ export default {
                 this.pedals[this.currentParent][childId] = {}
                 this.pedals[this.currentParent][childId].id = childId
 
-                console.log(pedals)
+                console.log(this.pedals)
+                console.log('connected a child with a parent')
                 this.currentParent = null
             }
         },
@@ -51,7 +55,8 @@ export default {
             console.log('setting parent id: ' + parentId)
             this.currentParent = parentId
         },
-        passOutput (output) {
+        passOutput (output) { // Sends on the information to everyone who needs it.
+            console.log('App revcieved the input: ' + output.text)
             let chainOutput = {}
             chainOutput.text = output.text
             chainOutput.id = output.id
@@ -73,6 +78,7 @@ export default {
             this.setParent(parentId)
         })
         bus.$on('new-output', (output) => {
+            console.log('recieved the output - ' + output.text)
             this.latestOutput = output.text
             this.passOutput(output)
         })
