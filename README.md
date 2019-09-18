@@ -8,6 +8,10 @@ The original idea was to make an interface that allows users to apply classic gu
 
 
 
+![The main idea](The main idea.png)
+
+
+
 The project is written in JavaScript in the [Vue](https://github.com/vuejs/vue) framework
 
 ### There is much to do
