@@ -1,14 +1,12 @@
 <template>
     <div id="app">
-        <testPedal :inputs="inputStrings" :maxInputs="4" title="test pedal" ></testPedal>
-        <reversePedal :inputs="inputStrings" :maxInputs="4" title="reverse Pedal" ></reversePedal>
+        <reversePedal :inputs="inputStrings" :maxInputs="2"  title="Reverse Pedal" ></reversePedal>
+        <testPedal :inputs="inputStrings"  :maxInputs="2" title="Test Pedal" ></testPedal>
     </div>
-</template>
+    </template>
 
 <script>
 import reversePedal from './components/reversePedal.vue'
-import wordmixPedal from './components/wordmixPedal.vue'
-import wahPedal from './components/wahPedal.vue'
 import testPedal from './components/testPedal.vue'
 import { bus } from './main.js'
 
@@ -22,19 +20,13 @@ export default {
         return {
             inputStrings: {
                 'master': 'dog',
-                'mister': 'cat',
-                'maestro': 'butter'
             },
             pedals: {},
             currentParent: null,
-            latestOutput: null
+            latestOutput: {},
         }
     },
     methods: {
-        newWord () {
-            console.log(`dont just click on things`)
-        },
-
         setChild (childId) {
             console.log('setting child id: ' + childId)
             if (this.currentParent != null) {
@@ -45,9 +37,7 @@ export default {
                 }
                 this.pedals[this.currentParent][childId] = {}
                 this.pedals[this.currentParent][childId].id = childId
-
-                console.log(this.pedals)
-                console.log('connected a child with a parent')
+                this.setRelationship(this.currentParent, childId) // Letting the pedals know about eachother
                 this.currentParent = null
             }
         },
@@ -55,19 +45,27 @@ export default {
             console.log('setting parent id: ' + parentId)
             this.currentParent = parentId
         },
+        setRelationship(parentId, childId) {
+            let family = {}
+            family.parent = parentId
+            family.child = childId
+            family.output = this.latestOutput[parentId]; // Where and how do i keep track of what the different pedals have outputted? 
+            bus.$emit('pedal-family', family)
+        },
         passOutput (output) { // Sends on the information to everyone who needs it.
             console.log('App revcieved the input: ' + output.text)
-            let chainOutput = {}
-            chainOutput.text = output.text
-            chainOutput.id = output.id
-            chainOutput.recievers = this.pedals[output.id]
-            if (chainOutput.recievers != undefined) {
-                bus.$emit('chain-output', chainOutput)
-            } else {
-                console.warn("tried to send event to all recievers, but there were not any")
-            }
-        }
 
+            let chainOutput = {} // Creating the output object
+            chainOutput.text = output.text // adding the text
+            chainOutput.id = output.id // Adding the id
+            chainOutput.recievers = this.pedals[output.id] // Setting the recievers to the recievers of the pedal
+
+            if (chainOutput.recievers != undefined) {
+                bus.$emit('chain-output', chainOutput) // If there are recievers, then send the information
+            } else {
+                console.warn("tried to send event to all recievers, but there were not any") // Else just print this warning
+            }
+        },
     },
 
     created () {
@@ -79,10 +77,11 @@ export default {
         })
         bus.$on('new-output', (output) => {
             console.log('recieved the output - ' + output.text)
-            this.latestOutput = output.text
+            this.latestOutput[output.id] = output.text
             this.passOutput(output)
         })
     }
+
 }
 
 </script>

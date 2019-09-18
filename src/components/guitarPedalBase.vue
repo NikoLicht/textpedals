@@ -7,16 +7,16 @@
         >
         <div class="handle">handle</div>
         <h1> {{ title }} </h1>
-        <div class="input-box cancel-drag" v-on:mouseup="isChild">
+            <div class="input-box cancel-drag" v-on:mouseup="isChild">
             <h1 class="input-label">INPUT</h1>
-            <div id="inputTexts" v-for="input in inputs" v-bind:key="input">
+            <div id="inputTexts" v-for="input in limitedInputs" v-bind:key="input">
                 <h2 class="input"> {{ input }} </h2>
             </div>
         </div>
 
         <div class="output-box cancel-drag" v-on:mousedown="isParent">
             <h1 class="output-label">OUTPUT</h1>
-            <h2 id="output"> {{ output }} </h2>
+            <h2 id="output"> {{ outputText }} </h2>
         </div>
     </vue-draggable-resizable>
 </template>
@@ -33,45 +33,71 @@ export default {
         inputs: Object,
         chainParent: Object,
         chainChild: Array,
-        maxInputs: Number
+        maxInputs: Number,
+        connectors: Object,
     },
+
     data: function () {
         return {
             output: '',
             id: '',
+            inputConnections: {},
             width: 0,
             height: 0,
+            limitedInputs: [],
             x: 0,
             y: 0
         }
     },
+
     components: {
         VueDraggableResizable
     },
+
     watch: {
-        inputs: function (val) {
-            this.output = this.changeText(this.inputs)
-            let finalOutput = {}
-            finalOutput.id = this.id
-            finalOutput.text = this.output
-            console.log('this is the output that is being send' + this.output)
-            this.sendOutput(finalOutput)
+        inputs: function () {
+            console.log('guitarpedalbase update is called, due to change in input')
+            this.update()
+        },
+    },
+
+    computed: {
+        outputText() {
+            this.debuglog("outputText", this.output)
             return this.output
         }
     },
+
     methods: {
-        changeText: function (inputArray) {
-            return this.saveOutput("a string") 
+        fillLimitedInputs: function () {
+            let count = 0
+            this.limitedInputs = []
+            Object.keys(this.inputs).forEach((input) => {
+                if (count > this.maxInputs) {
+                    console.log("adding the input " + input.text + " to limitedInputs")
+                    this.limitedInputs.push(input.text)
+                }
+                count ++
+            })
+            this.debuglog("filllimitedInputs", "this is the limited inputs, with length: " + this.limitedInputs.length)
         },
+
+        changeText: function (inputArray) { // This is the funtion that will generate a single string that is the output
+            return "init-string"
+        },
+
         sendOutput: function (newOutput) {
             bus.$emit('new-output', newOutput)
         },
+
         isParent: function () {
             bus.$emit('is-parent', this.id)
         },
+
         isChild: function () {
             bus.$emit('is-child', this.id)
         },
+
         calculateId: function () {
             let newId = ''
             function s4 () {
@@ -81,14 +107,22 @@ export default {
             }
             newId = s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4()
             this.id = newId
-            console.log("setting output")
         },
-        saveOutput (result) {
-            this.output = result
-            this.sendOutput(result)
-            return result
+
+        saveOutput: function (outputPackage) {
+            this.output = outputPackage.text // this is where it happens
+            this.sendOutput(outputPackage)
+            return outputPackage
         },
-        isEmptyOrNullOrUndefined: function(text) {
+
+        createOutputPackage: function(text) {
+            let outputPackage = {}
+            outputPackage.text = text
+            outputPackage.id = this.id
+            return outputPackage
+        },
+
+        isExistant: function(text) {
             let testResult = true
 
             if ( text == null ){
@@ -100,24 +134,60 @@ export default {
             }
             return false
         },
+
+        debuglog: function (parent, message) {
+            console.log("%c   " + this.title + ", " + parent + ": " + message + "  ", 'background: #ffd480; color: #000')
+        },
+
         onDrag: function (x, y) {
             this.x = x
             this.y = y
-        }
+        },
+
+        update: function () {
+            let tempOut = this.changeText(this.inputs) // Calculates the output
+            this.debuglog("update", this.output)
+
+            let finalOutput = this.createOutputPackage(tempOut) // Creating the output package
+            this.saveOutput(finalOutput) // Sending the output (emitting)
+            return this.output // Returning as well
+        },
+
     },
+
     mounted () {
         this.calculateId()
-        this.output = this.changeText(this.inputs)
-        return this.output
+        this.fillLimitedInputs()
+        this.update()
     },
-    created () {
-        bus.$on('chain-output', (chainOutput) => {
-            //This is probably where the pedals input field should be updated
-            if (this.id in chainOutput.recievers) {
-                this.inputs[chainOutput.id] = chainOutput.text
-                console.log(chainOutput.text)
-                console.log(this.inputs)
+
+    created () { // here subscribing should happen
+        console.log("Created " + this.title);
+        if (!this.isExistant(this.inputs)) {
+            bus.$on('chain-output', (chainOutput) => { // Subscribing to the chain-output
+                if (this.id in chainOutput.recievers) { // If the output is meant for this pedal
+                    this.inputs[chainOutput.id] = chainOutput.text
+                }
+            })
+        }
+        else {
+            console.log("there was no input")
+        }
+
+        bus.$on('pedal-family', (family) => { // Subscribing to the pedal-family event
+            if (this.id == family.parent) {
+                this.chainChild = family.child
             }
+            else if (this.id == family.child) {
+
+                if (this.inputs == undefined) {
+                    this.inputs = {}
+                }
+                this.inputs[family.parent] = family.output
+                this.chainParent = family.parent
+            }
+
+            this.update()
         })
     }
 }
@@ -141,6 +211,7 @@ export default {
         width: 80%;
         margin-left: auto;
         margin-right: auto;
+        min-height: 100px;
         -webkit-user-select: none;  /* Chrome all / Safari all */
         -moz-user-select: none;     /* Firefox all */
         -ms-user-select: none;      /* IE 10+ */

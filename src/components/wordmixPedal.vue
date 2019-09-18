@@ -10,7 +10,7 @@ export default {
         changeText (inputs) {
             let progression = 0
             let result = ''
-            let listOfStrings = [] 
+            let listOfStrings = []
             let numberOfInputs = Object.keys(inputs).length
 
             Object.keys(inputs).forEach((input) => {
@@ -23,7 +23,7 @@ export default {
                 return b.length - a.length
             })
 
-            for (let i = 0; i < (listOfStrings[0].length - 1); i ++) {
+            for (let i = 0; i < (listOfStrings[0].length - 1); i++) {
                 for (let j = 0; j < (listOfStrings.length - 1); j++) {
                     if (!this.isEmptyOrNullOrUndefined(listOfStrings[i])) {
                         if (!this.isEmptyOrNullOrUndefined(listOfStrings[i][j])) {
@@ -32,7 +32,6 @@ export default {
                     }
                 }
             }
-
 
             return this.saveOutput(result)
         }

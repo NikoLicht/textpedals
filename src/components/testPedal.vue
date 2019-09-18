@@ -6,14 +6,18 @@ export default {
     methods: {
         changeText (inputs) {
             let result = ''
-            console.log('this is the inputs' + inputs)
-            console.log(inputs)
+            let inputsUsed = 0
             for (let port in inputs) {
-                console.log(inputs[port])
-                    result += inputs[port] + ' ' 
+                    console.log(inputs[port])
+                    inputsUsed++
+                    if (inputsUsed <= this.maxInputs) {
+                        result += inputs[port] + ' '
+                        console.log("port is " + port)
+                        console.log("input [port] is " + inputs[port])
+                    }
                 }
-            console.log(result)
-            return this.saveOutput(result)
+            console.log(`testpedal calculated the result to be ${result}`)
+            return result
         }
     }
 }

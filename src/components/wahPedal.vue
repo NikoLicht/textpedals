@@ -9,10 +9,10 @@ export default {
         changeText (inputs) {
             let result = ''
             let count = 0
-            for (let input in inputs) { 
+            for (let input in inputs) {
                 if (count < this.maxInputs) {
                     for (let i = 0; i < input.length - 1; i++) {
-                        switch(i % 3) {
+                        switch (i % 3) {
                             case 0:
                                 result += 'w'
                                 break
@@ -28,10 +28,9 @@ export default {
                             default:
                                 result += 'a'
                                 break
-
                         }
                     }
-                    count ++
+                    count++
                     return this.saveOutput(result)
                 }
             }
