@@ -16,15 +16,28 @@ The project is written in JavaScript in the [Vue](https://github.com/vuejs/vue) 
 
 ### There is much to do
 
-1. Make it work
-2. Add some lines, so you can see the child-parent  relationship
-3. Clean it up (find a better way to define inputs) -> probably with some kind of 
-4. Make some cool pedals / effects
-5. Make a system for managing and dynamically adding these pedals?
-6.  
-7.  
-8.  
-9. Somehow save the pedals and their connections when the website is closed
+- [ ] Make it work **(WIP)**
+- [ ] Add some lines, so you can see the child-parent  relationship **(WIP)**
+- [x] Clean it up (find a better way to define inputs) -> probably with some kind of 
+- [ ] Make some cool pedals / effects (**see below**) **(WIP)**
+- [ ] Make a system for managing and dynamically adding these pedals?
+- [ ] Somehow save the pedals and their connections when the website is closed
+
+## Pedals to be done:
+
+- [ ] Input source
+- [x] Mixer
+- [x] Wah-wah
+- [ ] Delay
+- [x] Reverb
+- [ ] Substitution
+- [ ] Loop
+- [ ] Distortion
+- [x] Reverse
+- [ ] Freeze
+- [ ] Trump (remove commas)
+- [ ] southern pedal? --> replace full words with shortened words
+- [ ] Volume (change between lower case - Camel Case - UPPER CASE, DOT. CASE. and exclamation marks)
 
 
 

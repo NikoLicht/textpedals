@@ -1,5 +1,3 @@
-<template>
-</template>
 <script>
 import PedalBase from './guitarPedalBase.vue'
 export default {
@@ -8,32 +6,26 @@ export default {
     methods: {
         changeText (inputs) {
             let result = ''
-            let count = 0
-            for (let input in inputs) {
-                if (count < this.maxInputs) {
-                    for (let i = 0; i < input.length - 1; i++) {
-                        switch (i % 3) {
-                            case 0:
-                                result += 'w'
-                                break
-                            case 1:
-                                result += 'a'
-                                break
-                            case 2:
-                                result += 'h'
-                                break
-                            case 3:
-                                result += 'h'
-                                break
-                            default:
-                                result += 'a'
-                                break
-                        }
+            let vocals = ["a", "e", "i", "o", "u", "y"]
+
+            if (inputs == undefined) {
+                console.warn("inputs is undefined")
+            } else { // If there is a main Input
+
+                // Vocals become wah
+                for (let i = 0; i < this.inputs["mainInput"].length - 1; i++) {
+                    let currentChar = this.inputs["mainInput"].charAt(i)
+
+                    if ( vocals.includes(currentChar)) {
+                        result += "wah"
                     }
-                    count++
-                    return this.saveOutput(result)
+                    else {
+                        result += currentChar
+                    }
                 }
             }
+
+            return result
         }
     }
 }

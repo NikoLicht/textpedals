@@ -2,19 +2,19 @@
     <vue-draggable-resizable
         class="pedal-base"
         @dragging="onDrag"
+        @dragstop="onDragStop"
         :parent="true"
         :drag-handle="'.handle'"
         >
         <div class="handle">handle</div>
-        <h1> {{ title }} </h1>
-            <div class="input-box cancel-drag" v-on:mouseup="isChild">
-            <h1 class="input-label">INPUT</h1>
-            <div id="inputTexts" v-for="input in limitedInputs" v-bind:key="input">
-                <h2 class="input"> {{ input }} </h2>
-            </div>
+        <h1 class="pedal-title"> {{ title }} </h1>
+
+        <div class="input-fields">
+            <InputField class="single-input-field" v-for="inputField in inputFields" :title="inputField.title" type="string" :parentId="id" :parentName="title" >
+            </InputField>
         </div>
 
-        <div class="output-box cancel-drag" v-on:mousedown="isParent">
+        <div ref="start" id="start" class="output-box cancel-drag" v-on:mousedown="isParent">
             <h1 class="output-label">OUTPUT</h1>
             <h2 id="output"> {{ outputText }} </h2>
         </div>
@@ -24,41 +24,37 @@
 <script>
 import { bus } from '../main.js'
 import VueDraggableResizable from 'vue-draggable-resizable'
+import InputField from './inputField.vue'
 
 export default {
     name: 'PedalBase',
     props: {
         title: String,
         color: String,
-        inputs: Object,
         chainParent: Object,
-        chainChild: Array,
         maxInputs: Number,
+        inputFields: Array,
         connectors: Object,
     },
 
     data: function () {
         return {
-            output: '',
             id: '',
-            inputConnections: {},
+            inputs: {},
+            output: '',
+            limitedInputs: [],
+            recieverOfoutput : "",
             width: 0,
             height: 0,
-            limitedInputs: [],
             x: 0,
-            y: 0
+            y: 0,
+            shouldLog: false,
         }
     },
 
     components: {
-        VueDraggableResizable
-    },
-
-    watch: {
-        inputs: function () {
-            console.log('guitarpedalbase update is called, due to change in input')
-            this.update()
-        },
+        VueDraggableResizable,
+        InputField
     },
 
     computed: {
@@ -69,20 +65,11 @@ export default {
     },
 
     methods: {
-        fillLimitedInputs: function () {
-            let count = 0
-            this.limitedInputs = []
-            Object.keys(this.inputs).forEach((input) => {
-                if (count > this.maxInputs) {
-                    console.log("adding the input " + input.text + " to limitedInputs")
-                    this.limitedInputs.push(input.text)
-                }
-                count ++
-            })
-            this.debuglog("filllimitedInputs", "this is the limited inputs, with length: " + this.limitedInputs.length)
-        },
-
-        changeText: function (inputArray) { // This is the funtion that will generate a single string that is the output
+        /* 
+            ChangeText function takes the inputs and returns an output
+            This is the function to overwrite when making a new textPedal 
+        */
+        changeText: function (inputArray) {
             return "init-string"
         },
 
@@ -90,12 +77,23 @@ export default {
             bus.$emit('new-output', newOutput)
         },
 
-        isParent: function () {
-            bus.$emit('is-parent', this.id)
+        log: function (message) {
+            if (this.shouldLog = true) {
+                console.log(message)
+            }
         },
 
-        isChild: function () {
-            bus.$emit('is-child', this.id)
+        getPositionOfOutput: function (element) {
+            let positions = {}
+            positions.x = element.getBoundingClientRect().right
+            positions.y = element.getBoundingClientRect().top
+            positions.id = this.id
+            return positions
+        },
+
+        isParent: function () {
+            bus.$emit('is-parent', this.id)
+            bus.$emit('line-start', this.getPositionOfOutput(this.$refs.start))
         },
 
         calculateId: function () {
@@ -106,7 +104,7 @@ export default {
                     .substring(1)
             }
             newId = s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4()
-            this.id = newId
+            return newId
         },
 
         saveOutput: function (outputPackage) {
@@ -136,59 +134,68 @@ export default {
         },
 
         debuglog: function (parent, message) {
-            console.log("%c   " + this.title + ", " + parent + ": " + message + "  ", 'background: #ffd480; color: #000')
+            this.log("%c   " + this.title + ", " + parent + ": " + message + "  ", 'background: #ffd480; color: #000')
         },
 
         onDrag: function (x, y) {
             this.x = x
             this.y = y
+            // This is where we should handle moving all the connected strings
+        },
+        
+        onDragStop: function () {
+            this.log("drag ended")
+            bus.$emit('line-start', this.getPositionOfOutput(this.$refs.start))
         },
 
         update: function () {
-            let tempOut = this.changeText(this.inputs) // Calculates the output
-            this.debuglog("update", this.output)
+            let tempOut = this.changeText(this.inputs) // Calculates the output 
 
             let finalOutput = this.createOutputPackage(tempOut) // Creating the output package
             this.saveOutput(finalOutput) // Sending the output (emitting)
             return this.output // Returning as well
         },
 
+        onUpdateRequest: function (updateRequest) {
+            this.debuglog("update-parent-event", updateRequest)
+
+            if (this.id == updateRequest.recieverId) { // If this is the reviever of the update Request
+                // What needs to happen here is that the input for that component must be updated. 
+                this.log("---- updateRequest -----")
+                this.log("now setting inputs [" + updateRequest.senderName + "] to " + updateRequest.text)
+                this.log(updateRequest)
+                this.log("---- updateRequest -----")
+
+                this.inputs[updateRequest.senderName] = updateRequest.text
+
+                this.update()
+            }
+        },
+
+        onPedalFamily: function (family) { 
+            if (this.id == family.parent) {
+                this.recieverOfoutput = family.child // recieverOfOutput becomes the id of the input  on another pedal
+            }
+        },
     },
 
     mounted () {
-        this.calculateId()
-        this.fillLimitedInputs()
+        this.id = this.calculateId()
+        this.log(this.title + "- updated(): this.inputFields : " + this.inputFields)
+
+        for (let inputField of this.inputFields) { //  This should set up every input field, such that it is known
+            this.inputs[inputField.title] = "no Input"
+            this.log(this.title + "- updated() : set inputs[" + inputField.title + " to: " + "no-Input")
+        }
+
         this.update()
     },
 
     created () { // here subscribing should happen
-        console.log("Created " + this.title);
-        if (!this.isExistant(this.inputs)) {
-            bus.$on('chain-output', (chainOutput) => { // Subscribing to the chain-output
-                if (this.id in chainOutput.recievers) { // If the output is meant for this pedal
-                    this.inputs[chainOutput.id] = chainOutput.text
-                }
-            })
-        }
-        else {
-            console.log("there was no input")
-        }
+        this.log("Created " + this.title);
+        bus.$on('pedal-family', (family) => this.onPedalFamily(family))
+        bus.$on("update-parent", (updateRequest) => this.onUpdateRequest(updateRequest))
 
-        bus.$on('pedal-family', (family) => { // Subscribing to the pedal-family event
-            if (this.id == family.parent) {
-                this.chainChild = family.child
-            }
-            else if (this.id == family.child) {
-
-                if (this.inputs == undefined) {
-                    this.inputs = {}
-                }
-                this.inputs[family.parent] = family.output
-                this.chainParent = family.parent
-            }
-
-            this.update()
-        })
     }
 }
 
@@ -203,26 +210,51 @@ export default {
     -webkit-user-select: none;  /* Chrome all / Safari all */
     -moz-user-select: none;     /* Firefox all */
     -ms-user-select: none;      /* IE 10+ */
-    user-select: none;          /* Likely future */      border-radius: 25px;
+    border-radius: 25px;
 
-    .input-box, .output-box{
+    .pedal-title{
+        font-size: 2em;
+        margin: 0.5em;
+        padding: 0;
+        color: white;
+    }
+
+    .output-box{
         border-radius: 25px;
         background-color: #f5b46e;
         width: 80%;
         margin-left: auto;
         margin-right: auto;
-        min-height: 100px;
+        font-size: 0.7em;
         -webkit-user-select: none;  /* Chrome all / Safari all */
         -moz-user-select: none;     /* Firefox all */
         -ms-user-select: none;      /* IE 10+ */
-        user-select: none;          /* Likely future */      border-radius: 25px;
+        border-radius: 25px;
     }
 
-    h1{
-        padding-top: 1em;
-        font-size: 1em;
-        color: white;
+    .input-fields{
+        border-radius: 25px;
+        width: 80%;
+        margin-left: auto;
+        margin-right: auto;
+        -webkit-user-select: none;  /* Chrome all / Safari all */
+        -moz-user-select: none;     /* Firefox all */
+        -ms-user-select: none;      /* IE 10+ */
+
+        .input-wrapper {
+            background-color: #f5b46e;
+            width: 100%;
+            border-radius: 25px;
+
+            .input-name {
+                color: white;
+                font-size: 1em;
+                font-weight: normal;
+            }
+        }
+
     }
+
     .handle{
         background-color: #a89371;
         width: 80%;
@@ -234,5 +266,4 @@ export default {
         margin-right: auto;
     }
 }
-
 </style>

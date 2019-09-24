@@ -1,6 +1,3 @@
-<template>
-</template>
-
 <script>
 import PedalBase from './guitarPedalBase.vue'
 export default {
@@ -8,32 +5,35 @@ export default {
     name: 'wordmix-pedal',
     methods: {
         changeText (inputs) {
-            let progression = 0
             let result = ''
-            let listOfStrings = []
-            let numberOfInputs = Object.keys(inputs).length
+            let longestInput = ''
+            let shortestInput = ''
 
-            Object.keys(inputs).forEach((input) => {
-                listOfStrings.push(input)
-            })
+            if (inputs == undefined) {
+                console.warn("inputs is undefined")
+            } 
+            else { // If there is inputs
 
-            console.log(listOfStrings)
-
-            listOfStrings.sort((a, b) => {
-                return b.length - a.length
-            })
-
-            for (let i = 0; i < (listOfStrings[0].length - 1); i++) {
-                for (let j = 0; j < (listOfStrings.length - 1); j++) {
-                    if (!this.isEmptyOrNullOrUndefined(listOfStrings[i])) {
-                        if (!this.isEmptyOrNullOrUndefined(listOfStrings[i][j])) {
-                            result += listOfStrings[i][j]
-                        }
-                    }
+                // Find which input is the shortest and longest
+                if (this.inputs["Input A"].length >= this.inputs["Input B"]) {
+                    longestInput = this.inputs["Input A"]
+                    shortestInput = this.inputs["Input B"]
                 }
+                else {
+                    longestInput =  this.inputs["Input B"]
+                    shortestInput = this.inputs["Input A"]
+                }
+                
+                // Take one char from each
+                for (let letter = 0; letter < shortestInput.length; letter++){
+                    result += shortestInput.charAt(letter) + longestInput.charAt(letter)
+                }
+
+                // Append whichever letters are left from the longest word
+                result += longestInput.slice(shortestInput.length, longestInput.length)
             }
 
-            return this.saveOutput(result)
+            return result
         }
     }
 }

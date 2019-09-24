@@ -5,26 +5,24 @@ export default {
     name: 'reverse-pedal',
     methods: {
         changeText (inputs) { // change text must return a single string... for now
-            let result = ''
-            let inputsWentThrough = 0
-            
+            let result = ""
+
             if (inputs == undefined) {
                 console.warn("inputs is undefined")
-            }
-
-            if (!this.isExistant(inputs)) {
-                Object.keys(inputs).forEach((input) => {
-                    if (inputsWentThrough <= this.maxInputs) {
-                        result += inputs[input].split('').reverse().join('')
-                    }
-                    inputsWentThrough++
-                })
-
-                return result
             } else {
-                console.warn("The input is non-existant")
-                return ""
+                this.log("these are the inputs")
+                this.log(this.inputs)
+
+                for(let singleInput in this.inputs){
+                    this.log("outputting a single input")
+                    this.log(singleInput)
+                    this.log(this.inputs[singleInput])
+                }
+
+                result += this.inputs["mainInput"].split('').reverse().join('')
             }
+
+            return result
         }
     }
 }

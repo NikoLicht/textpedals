@@ -1,34 +1,84 @@
 <template>
-    <div id="app">
-        <reversePedal :inputs="inputStrings" :maxInputs="2"  title="Reverse Pedal" ></reversePedal>
-        <testPedal :inputs="inputStrings"  :maxInputs="2" title="Test Pedal" ></testPedal>
+    <div @mousemove="mouseMoveEvent" id="app">
+        <reversePedal :inputFields="reversePedalInputs" title="Reverse Pedal" ></reversePedal>
+        <reverbPedal :inputFields="reverbPedalInputs" title="Reverb Pedal" ></reverbPedal>
+        <wahPedal :inputFields="wahPedalInputs" title="Wah Wah" ></wahPedal>
+        <wordMixPedal :inputFields="wordMixInputs" title="Mixer"></wordMixPedal>
+        <sourcePedal :inputFields="sourceInputs" titel="Source Pedal"></sourcePedal> 
+
+        <pedalLines></pedalLines>
+
     </div>
     </template>
 
 <script>
+import pedalLines from  './components/lines.vue'
 import reversePedal from './components/reversePedal.vue'
-import testPedal from './components/testPedal.vue'
+import sourcePedal from './components/sourcePedal.vue'
+import reverbPedal from './components/reverbPedal.vue'
+import wahPedal from './components/wahPedal.vue'
+import wordMixPedal from './components/wordmixPedal.vue'
 import { bus } from './main.js'
 
 export default {
     name: 'app',
     components: {
-        testPedal,
-        reversePedal
+        pedalLines,
+        reversePedal,
+        sourcePedal,
+        wahPedal,
+        wordMixPedal,
+        reverbPedal,
     },
     data () {
         return {
             inputStrings: {
-                'master': 'dog',
+                'master': 'I am cool',
             },
             pedals: {},
+            shouldLog: false,
             currentParent: null,
             latestOutput: {},
+            reversePedalInputs: [
+                {
+                    title: "mainInput",
+                    type: "string"
+                },
+            ],
+            sourceInputs: [
+                {
+                    title: "textField",
+                    type: "string"
+                },
+            ],
+            wahPedalInputs: [
+                {
+                    title: "mainInput",
+                    type: "string"
+                },
+            ],
+            reverbPedalInputs: [
+                {
+                    title: "mainInput",
+                    type: "string",
+                }
+            ],
+            wordMixInputs: [
+                {
+                    title: "Input A",
+                    type: "string",
+                },
+                {
+                    title: "Input B",
+                    type: "string",
+                }
+            ]
+
         }
     },
     methods: {
         setChild (childId) {
-            console.log('setting child id: ' + childId)
+            this.log('setting child id: ' + childId)
             if (this.currentParent != null) {
                 // TODO: check if the parent already has the child
 
@@ -40,20 +90,23 @@ export default {
                 this.setRelationship(this.currentParent, childId) // Letting the pedals know about eachother
                 this.currentParent = null
             }
+            else{
+                console.warn("There was no parent to assign to child")
+            }
         },
         setParent (parentId) {
-            console.log('setting parent id: ' + parentId)
+            this.log('setting parent id: ' + parentId)
             this.currentParent = parentId
         },
         setRelationship(parentId, childId) {
             let family = {}
             family.parent = parentId
             family.child = childId
-            family.output = this.latestOutput[parentId]; // Where and how do i keep track of what the different pedals have outputted? 
+            family.output = this.latestOutput[parentId];
             bus.$emit('pedal-family', family)
         },
         passOutput (output) { // Sends on the information to everyone who needs it.
-            console.log('App revcieved the input: ' + output.text)
+            this.log('App revcieved the input: ' + output.text)
 
             let chainOutput = {} // Creating the output object
             chainOutput.text = output.text // adding the text
@@ -66,9 +119,28 @@ export default {
                 console.warn("tried to send event to all recievers, but there were not any") // Else just print this warning
             }
         },
+
+        log: function (message) {
+            if (this.shouldLog = true) {
+                console.log(message)
+            }
+        },
+
+        createSVGCanvas () {
+            let svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        },
+
+        mouseMoveEvent(event) {
+            let newPos = {}
+            newPos.x = event.pageX
+            newPos.y = event.pageY
+            bus.$emit("mouse-move", newPos)
+        },
     },
 
     created () {
+        this.createSVGCanvas()
+
         bus.$on('is-child', (childId) => {
             this.setChild(childId)
         })
@@ -76,7 +148,7 @@ export default {
             this.setParent(parentId)
         })
         bus.$on('new-output', (output) => {
-            console.log('recieved the output - ' + output.text)
+            this.log('recieved the output - ' + output.text)
             this.latestOutput[output.id] = output.text
             this.passOutput(output)
         })
