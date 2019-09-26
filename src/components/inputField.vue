@@ -1,6 +1,8 @@
 <template>
-    <div class="input-wrapper" v-on:mouseup="isChild">
-        <h1 ref="lineEnd" class="input-name"> {{title}} </h1>
+    <div v-on:mouseup="isChild" class="input-wrapper">
+        <h1 ref="lineEnd" class="input-name"> 
+            {{title}} 
+        </h1>
     </div>
 </template>
 
@@ -20,8 +22,8 @@ export default {
         return {
             value: "",
             connectedComponentId: "",
-            id: "",
-            shouldLog: false,
+            inputFieldId: "",
+            inputFieldShouldLog: false,
         }
     },
 
@@ -48,23 +50,25 @@ export default {
         },
 
         log: function (message) {
-            if (this.shouldLog = true) {
+            if (this.inputFieldShouldLog == true) {
                 console.log(message)
             }
         },
 
         isChild: function () {
-            bus.$emit('is-child', this.id)
+            bus.$emit('is-child', this.inputFieldId)
+            this.sendPosition() // Emits the position for the lines
         },
 
-        getPositionOfInput(element){
-            let positions = {}
-            positions.x = element.getBoundingClientRect().left
-            positions.y = element.getBoundingClientRect().top // consider getting the lowest 
-            return positions
+        getPositionOfInput: function (thisInputField){ // This is the position of the 
+            let position = {}
+            position.x = thisInputField.getBoundingClientRect().left
+            position.y = thisInputField.getBoundingClientRect().top // consider getting the lowest 
+            position.id = this.inputFieldId
+            return position
         },
 
-        sendPosition() {
+        sendPosition: function() {
             bus.$emit('line-end', this.getPositionOfInput(this.$refs.lineEnd))
         },
 
@@ -81,9 +85,8 @@ export default {
         
         subscribeToFamilyEvent: function () {
             bus.$on('chain-output', (chainOutput) => { // Subscribing to the chain-output
-                if (this.id in chainOutput.recievers) { // If the output is meant for this pedal
+                if (this.inputFieldId in chainOutput.recievers) { // If the output is meant for this pedal
                     this.value = chainOutput.text // Saving the output of the other pedal as value
-                    this.sendPosition() // Emits the position for the lines
                     this.log(this.title + ": this output was meant for me")
                 }
                 else {
@@ -92,8 +95,8 @@ export default {
             })
 
             bus.$on('pedal-family', (family) => { // Subscribing to the pedal-family event
-                if (this.id == family.child) {
-                    this.connectedComponentId = family.output
+                if (this.inputFieldId == family.child) {
+                    this.connectedComponentId = family.parent
                 }
                 this.updateParent()
             })
@@ -103,7 +106,7 @@ export default {
         updateParent: function () {
             let updateObject = {}
             updateObject.recieverId = this.parentId
-            updateObject.senderId = this.id
+            updateObject.senderId = this.inputFieldId
             updateObject.text = this.value
             updateObject.senderName = this.title
 
@@ -113,7 +116,8 @@ export default {
     },
 
     created () { // this should be where we subscribe
-        this.id = this.calculateId()
+        this.inputFieldId = this.calculateId()
+        console.log("calculated the field id" + this.inputFieldId)
         this.subscribeToFamilyEvent()
         this.updateParent()
     }

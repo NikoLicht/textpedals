@@ -121,7 +121,7 @@ export default {
         },
 
         log: function (message) {
-            if (this.shouldLog = true) {
+            if (this.shouldLog == true) {
                 console.log(message)
             }
         },

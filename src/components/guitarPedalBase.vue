@@ -10,7 +10,7 @@
         <h1 class="pedal-title"> {{ title }} </h1>
 
         <div class="input-fields">
-            <InputField class="single-input-field" v-for="inputField in inputFields" :title="inputField.title" type="string" :parentId="id" :parentName="title" >
+            <InputField v-for="inputField in inputFields" :title="inputField.title" type="string" :parentId="id" :parentName="title" >
             </InputField>
         </div>
 
@@ -78,7 +78,7 @@ export default {
         },
 
         log: function (message) {
-            if (this.shouldLog = true) {
+            if (this.shouldLog == true) {
                 console.log(message)
             }
         },
@@ -250,6 +250,8 @@ export default {
                 color: white;
                 font-size: 1em;
                 font-weight: normal;
+                padding: 0;
+                margin: 0;
             }
         }
 

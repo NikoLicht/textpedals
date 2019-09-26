@@ -25,14 +25,15 @@ export default {
     methods: {
         onClickedOnInput() {
             bus.$on('line-start', (element) => {
+                console.log("Pedal id: " + element.id)
                 this.shouldDrawLine = true
-                this.log("setting the shouldDrawline to true")
                 this.startLine(element)
             })
         },
 
         onReleasedOverInput() {
             bus.$on('line-end', (element) => {
+                console.log("Input field id: " + element.id)
                 this.shouldDrawLine = false
                 this.endLine(element)
             })
@@ -50,11 +51,12 @@ export default {
             startPos.x = element.x
             startPos.y = element.y
 
+            this.currentLine = {}
             this.currentLine.start = startPos
         },
 
         log(message) {
-            if (this.shouldLog) {
+            if (this.shouldLog == true) {
                 console.log(message)
             }
         },
@@ -65,15 +67,18 @@ export default {
                 let endPos = {}
                 endPos.x = element.x
                 endPos.y = element.y
+
+                this.log("saving under the id: " + element.id)
                 
                 if (this.lines[element.id] ==  undefined) { // Indexing by inputs, as they can only have one line
+                    this.log("it was undefined indeed")
                     this.lines[element.id] = {}
                 }
 
                 this.lines[element.id].start = this.currentLine.start
-                this.log(this.currentLine.start)
                 this.lines[element.id].end = endPos
 
+                this.currentLine = null
                 this.$forceUpdate()
 
             }else {
@@ -82,14 +87,10 @@ export default {
         },
     },
 
-    created() {
-    },
-
     mounted() { // Subscribing to the events
         this.onNewMousePosition()
         this.onClickedOnInput()
         this.onReleasedOverInput()
-
     },
 }
     
