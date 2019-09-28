@@ -10,7 +10,7 @@
         <h1 class="pedal-title"> {{ title }} </h1>
 
         <div class="input-fields">
-            <InputField v-for="inputField in inputFields" :title="inputField.title" type="string" :parentId="id" :parentName="title" >
+            <InputField v-for="inputField in inputFields" :inputFieldId="calculateId()" :title="inputField.title" type="string" :parentId="id" :parentName="title" >
             </InputField>
         </div>
 
@@ -140,7 +140,13 @@ export default {
         onDrag: function (x, y) {
             this.x = x
             this.y = y
-            // This is where we should handle moving all the connected strings
+            // Create an object tja
+        },
+
+        moveConnectedLines: function () {
+            let movementInfo = {} // get all the ids from the input fields
+            // ids = 
+            bus.$emit('move-connected-lines', movementInfo)
         },
         
         onDragStop: function () {

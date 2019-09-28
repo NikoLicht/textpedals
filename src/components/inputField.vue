@@ -16,13 +16,13 @@ export default {
         type: String,
         parentId: String,
         parentName: String,
+        inputFieldId: String,
     },
 
     data: function () {
         return {
             value: "",
             connectedComponentId: "",
-            inputFieldId: "",
             inputFieldShouldLog: false,
         }
     },
@@ -72,17 +72,6 @@ export default {
             bus.$emit('line-end', this.getPositionOfInput(this.$refs.lineEnd))
         },
 
-        calculateId: function () {
-            let newId = ''
-            function s4 () {
-                return Math.floor((1 + Math.random()) * 0x10000)
-                    .toString(16)
-                    .substring(1)
-            }
-            newId = s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4()
-            return newId
-        },
-        
         subscribeToFamilyEvent: function () {
             bus.$on('chain-output', (chainOutput) => { // Subscribing to the chain-output
                 if (this.inputFieldId in chainOutput.recievers) { // If the output is meant for this pedal
@@ -116,8 +105,6 @@ export default {
     },
 
     created () { // this should be where we subscribe
-        this.inputFieldId = this.calculateId()
-        console.log("calculated the field id" + this.inputFieldId)
         this.subscribeToFamilyEvent()
         this.updateParent()
     }

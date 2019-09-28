@@ -43,6 +43,7 @@ export default {
                 {
                     title: "mainInput",
                     type: "string"
+                    // Add an ID here instead, such that we can see them in the guitar pedal base and move the lines accordingly
                 },
             ],
             sourceInputs: [

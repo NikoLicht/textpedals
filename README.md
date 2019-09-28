@@ -14,21 +14,30 @@ The original idea was to make an interface that allows users to apply classic gu
 
 The project is written in JavaScript in the [Vue](https://github.com/vuejs/vue) framework
 
+
+
+## current status
+
+I am working on the lines. They now look nice, but are not being moved when components are moved. 
+The upcoming task is to make a different types of input, most importantly editable text input.
+
 ### There is much to do
 
-- [ ] Make it work **(WIP)**
-- [ ] Add some lines, so you can see the child-parent  relationship **(WIP)**
+- [x] Make it work
 - [x] Clean it up (find a better way to define inputs) -> probably with some kind of 
-- [ ] Make some cool pedals / effects (**see below**) **(WIP)**
+- [ ] Add some lines, so you can see the child-parent  relationship **(WIP)**
+- [ ] Make different types of input fields
+- [ ] Make a build and host it somewhere
 - [ ] Make a system for managing and dynamically adding these pedals?
+- [ ] Make more pedals
 - [ ] Somehow save the pedals and their connections when the website is closed
+- [ ] Make documentation / help dialogue
 
 ## Pedals to be done:
 
 - [ ] Input source
 - [x] Mixer
 - [x] Wah-wah
-- [ ] Delay
 - [x] Reverb
 - [ ] Substitution
 - [ ] Loop

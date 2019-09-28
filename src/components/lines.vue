@@ -1,8 +1,19 @@
 <template>
     <svg ref="lines-svg" id="lines-svg" xmlns="http://www.w3.org/2000/svg">
        <g>
-           <path v-for="path in lines" :d="'M' + path.start.x + ' ' + path.start.y + ' L' + path.end.x + ' ' + path.end.y" stroke="red" stroke-width="10" />
-           <path v-if="shouldDrawLine" :d="'M' + this.currentLine.start.x + ' ' + this.currentLine.start.y + ' L' + mousePos.x + ' ' + mousePos.y" stroke-width="10" stroke="green" />
+           <path v-for="path in lines" :d='
+                "M " + path.start.x + ",  " + path.start.y + " " 
+                + "C " + getBezierStart(path.start).x + ",  " + getBezierStart(path.start).y + " "
+                + getBezierEnd(path.end).x + ",  " + getBezierEnd(path.end).y + " " 
+                + path.end.x + ",  " + path.end.y'
+                stroke-width="10" stroke="red" fill="none" />
+
+           <path v-if="shouldDrawLine" :d='
+                "M " + currentLine.start.x + ",  " + currentLine.start.y + " " 
+                + "C " + getBezierStart(currentLine.start).x + ",  " + getBezierStart(currentLine.start).y + " "
+                + getBezierEnd(mousePos).x + ",  " + getBezierEnd(mousePos).y + " " 
+                + mousePos.x + ",  " + mousePos.y'
+                stroke-width="10" stroke="red" fill="none" />
        </g>
     </svg>
 </template>
@@ -15,6 +26,7 @@ export default {
             lines: {},
             shouldLog: true,
             currentLineId: null,
+            lineBezierOffset: 175,
             currentLine: {
                 start: {x: 0, y: 0},
             },
@@ -23,6 +35,33 @@ export default {
         }
     },
     methods: {
+        getBezierStart(start) { 
+            let startPoint= {
+                x : start.x + this.lineBezierOffset,
+                y : start.y
+            }
+ 
+            return startPoint
+        },
+
+        getBezierEnd(end) {
+            let endPoint = {
+                x : end.x - this.lineBezierOffset,
+                y : end.y
+            }
+            return endPoint
+        },
+
+        getBezierToMouse() {
+            console.log("getBezierToMouse is being called")
+            let bez = "M " + this.currentLine.start.x + ",  " + this.currentLine.start.y + " " 
+                + "C " + this.getBezierPoints().pointA.x + ",  " + this.getBezierPoints().pointA.y + " "
+                + this.getBezierPoints().pointB.x + ",  " + this.getBezierPoints().pointB.y + " " 
+                + mousePos.x + ",  " + mousePos.y
+            console.log(bez)
+            return bez
+        },
+
         onClickedOnInput() {
             bus.$on('line-start', (element) => {
                 console.log("Pedal id: " + element.id)
