@@ -25,13 +25,13 @@ export default {
         return {
             lines: {},
             shouldLog: true,
-            currentLineId: null,
             lineBezierOffset: 175,
             currentLine: {
                 start: {x: 0, y: 0},
             },
             mousePos: {},
             shouldDrawLine : false,
+            endPointIndex: {},
         }
     },
     methods: {
@@ -53,18 +53,15 @@ export default {
         },
 
         getBezierToMouse() {
-            console.log("getBezierToMouse is being called")
             let bez = "M " + this.currentLine.start.x + ",  " + this.currentLine.start.y + " " 
                 + "C " + this.getBezierPoints().pointA.x + ",  " + this.getBezierPoints().pointA.y + " "
                 + this.getBezierPoints().pointB.x + ",  " + this.getBezierPoints().pointB.y + " " 
                 + mousePos.x + ",  " + mousePos.y
-            console.log(bez)
             return bez
         },
 
         onClickedOnInput() {
             bus.$on('line-start', (element) => {
-                console.log("Pedal id: " + element.id)
                 this.shouldDrawLine = true
                 this.startLine(element)
             })
@@ -72,7 +69,6 @@ export default {
 
         onReleasedOverInput() {
             bus.$on('line-end', (element) => {
-                console.log("Input field id: " + element.id)
                 this.shouldDrawLine = false
                 this.endLine(element)
             })
@@ -84,6 +80,33 @@ export default {
             })
         },
 
+        onUpdateLineEnd () { // input fields
+            bus.$on("update-line-end", (lineEnd) => {
+                let index = lineEnd.id
+                if (this.lines[index] != undefined) {
+                    this.lines[index].end.x = lineEnd.x
+                    this.lines[index].end.y = lineEnd.y
+                    this.$forceUpdate()
+                }
+            })
+        },
+
+        onUpdateLineStart () { // output fields
+            bus.$on("update-line-start", (lineStart) => {
+                let indices = this.getIndexFromOutput(lineStart.id)
+                if (indices != undefined) {
+                    for(let index of indices) {
+                        this.lines[index].start.x = lineStart.x
+                        this.lines[index].start.y = lineStart.y
+                    }
+                    this.$forceUpdate()
+                }
+            })
+        },
+
+        getIndexFromOutput (outputId) {
+            return this.endPointIndex[outputId]
+        },
 
         startLine(element) {
             let startPos = {}
@@ -92,6 +115,7 @@ export default {
 
             this.currentLine = {}
             this.currentLine.start = startPos
+            this.currentLine.id = element.id
         },
 
         log(message) {
@@ -114,6 +138,12 @@ export default {
                     this.lines[element.id] = {}
                 }
 
+                if (this.endPointIndex[this.currentLine.id] == undefined) {
+                    this.endPointIndex[this.currentLine.id] = []
+                }
+
+                this.endPointIndex[this.currentLine.id].push(element.id)
+
                 this.lines[element.id].start = this.currentLine.start
                 this.lines[element.id].end = endPos
 
@@ -127,6 +157,8 @@ export default {
     },
 
     mounted() { // Subscribing to the events
+        this.onUpdateLineStart()
+        this.onUpdateLineEnd()
         this.onNewMousePosition()
         this.onClickedOnInput()
         this.onReleasedOverInput()

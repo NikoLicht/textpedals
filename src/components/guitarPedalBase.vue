@@ -10,13 +10,13 @@
         <h1 class="pedal-title"> {{ title }} </h1>
 
         <div class="input-fields">
-            <InputField v-for="inputField in inputFields" :inputFieldId="calculateId()" :title="inputField.title" type="string" :parentId="id" :parentName="title" >
+            <InputField v-for="inputField in inputFields" :inputFieldId="inputField.id" :title="inputField.title" type="string" :parentId="id" :parentName="title" >
             </InputField>
         </div>
 
-        <div ref="start" id="start" class="output-box cancel-drag" v-on:mousedown="isParent">
+        <div ref="start" id="start" class="output-box cancel-drag" >
             <h1 class="output-label">OUTPUT</h1>
-            <h2 id="output"> {{ outputText }} </h2>
+            <h2 v-on:mousedown="isParent" id="output"> {{ outputText }} </h2>
         </div>
     </vue-draggable-resizable>
 </template>
@@ -141,16 +141,25 @@ export default {
             this.x = x
             this.y = y
             // Create an object tja
+            this.redrawLines()
+             
         },
 
-        moveConnectedLines: function () {
-            let movementInfo = {} // get all the ids from the input fields
-            // ids = 
-            bus.$emit('move-connected-lines', movementInfo)
+        redrawLines: function () {
+            for(let inputField of this.inputFields) { // updating end points (the input fields)
+                let updateRequest = {}
+                updateRequest.id = inputField.id
+                bus.$emit("update-inputField", updateRequest)
+            }
+        
+            this.updateLine()
+        },
+
+        updateLine: function () {
+            bus.$emit('update-line-start', this.getPositionOfOutput(this.$refs.start))
         },
         
         onDragStop: function () {
-            this.log("drag ended")
             bus.$emit('line-start', this.getPositionOfOutput(this.$refs.start))
         },
 
@@ -162,8 +171,16 @@ export default {
             return this.output // Returning as well
         },
 
+        setupInputFields: function () {
+            for (let inputField of this.inputFields) { //  This should set up every input field, such that it is known
+                    this.inputs[inputField.title] = "no Input"
+                    inputField.id = this.calculateId() // This might need to happen earlier (in the created() function) 
+                    this.log(this.title + "- updated() : set inputs[" + inputField.title + " to: " + "no-Input")
+                    // Make sure that the pedal base knows the ids of its own input fields, such that the lines can be moved when teh pedal is moved
+            }
+        },
+
         onUpdateRequest: function (updateRequest) {
-            this.debuglog("update-parent-event", updateRequest)
 
             if (this.id == updateRequest.recieverId) { // If this is the reviever of the update Request
                 // What needs to happen here is that the input for that component must be updated. 
@@ -187,17 +204,11 @@ export default {
 
     mounted () {
         this.id = this.calculateId()
-        this.log(this.title + "- updated(): this.inputFields : " + this.inputFields)
-
-        for (let inputField of this.inputFields) { //  This should set up every input field, such that it is known
-            this.inputs[inputField.title] = "no Input"
-            this.log(this.title + "- updated() : set inputs[" + inputField.title + " to: " + "no-Input")
-        }
-
         this.update()
     },
 
     created () { // here subscribing should happen
+        this.setupInputFields()
         this.log("Created " + this.title);
         bus.$on('pedal-family', (family) => this.onPedalFamily(family))
         bus.$on("update-parent", (updateRequest) => this.onUpdateRequest(updateRequest))

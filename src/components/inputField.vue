@@ -68,6 +68,18 @@ export default {
             return position
         },
 
+        onNewPosition: function () {
+            bus.$on("update-inputField", (updateRequest) => {
+                if (updateRequest.id == this.inputFieldId) {
+                    this.updateLine()
+                }
+            })
+        },
+
+        updateLine: function () {
+            bus.$emit('update-line-end', this.getPositionOfInput(this.$refs.lineEnd))
+        },
+
         sendPosition: function() {
             bus.$emit('line-end', this.getPositionOfInput(this.$refs.lineEnd))
         },
@@ -105,6 +117,7 @@ export default {
     },
 
     created () { // this should be where we subscribe
+        this.onNewPosition()
         this.subscribeToFamilyEvent()
         this.updateParent()
     }

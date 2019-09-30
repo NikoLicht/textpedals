@@ -25,7 +25,7 @@ The upcoming task is to make a different types of input, most importantly editab
 
 - [x] Make it work
 - [x] Clean it up (find a better way to define inputs) -> probably with some kind of 
-- [ ] Add some lines, so you can see the child-parent  relationship **(WIP)**
+- [x] Add some lines, so you can see the child-parent  relationship
 - [ ] Make different types of input fields
 - [ ] Make a build and host it somewhere
 - [ ] Make a system for managing and dynamically adding these pedals?
@@ -47,6 +47,13 @@ The upcoming task is to make a different types of input, most importantly editab
 - [ ] Trump (remove commas)
 - [ ] southern pedal? --> replace full words with shortened words
 - [ ] Volume (change between lower case - Camel Case - UPPER CASE, DOT. CASE. and exclamation marks)
+
+
+
+#### bugs
+
+- lines can be circular
+- it does not update all the time
 
 
 
